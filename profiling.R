@@ -1,4 +1,5 @@
 library(Rcpp)
+library(digest)
 library(profr)
 library(proftools)
 data(chat_network)
@@ -9,7 +10,18 @@ set.seed(1)
 chat_small <- chat_network[which(runif(nrow(chat_network)) < 0.5),]
 row.names(chat_small) <- NULL
 
-for(nm in list.files('src')) sourceCpp(paste0('src/', nm), rebuild = TRUE)
+for(nm in list.files('src')) {
+    if(!exists('cpp.digests')) cpp.digests <- list()
+    nm.hash <- digest(file=paste0('src/', nm))
+    if(is.null(cpp.digests[[nm]]) || cpp.digests[[nm]] != nm.hash) {
+        cat(nm, '::' , cpp.digests[[nm]], '->', nm.hash, '\n')
+        cpp.digests[[nm]] <- nm.hash
+        rebuild <- TRUE
+    } else {
+        rebuild <- FALSE
+    }
+    sourceCpp(paste0('src/', nm), rebuild = rebuild)
+}
 for(nm in list.files('R')) source(paste0('R/',nm))
 
 # source('R/renmr.R')
@@ -31,15 +43,13 @@ res <- renmr.network(event.history=chat_small,
 #                      statistics=list(stat.constant()),
                      statistics=list(stat.constant(),
                                      stat.wnetwork.relation('out','chat'),
-                                     stat.wnetwork.relation('in','chat'),
+                                     stat.wnetwork.relation('in','chat')
                                      ),
                      start.time=14336,
-                     verbose=TRUE, print.level=2, iterlim=1)
+                     verbose=TRUE, print.level=2, iterlim=10)
 Rprof(NULL)
 print(proc.time() - ptm)
 
 # summaryRprof('network.out', lines='both', memory='both')
 plot(parse_rprof('network.out'))
-# proftools.res <- readProfileData("network.out")
-# plotProfileCallGraph(proftools.res)
 

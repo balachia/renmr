@@ -81,13 +81,21 @@ em.base <- function(event.history, state.functions, stats, initial.params=numeri
 
     if (verbose) cat('Starting ML optimization\n')
 #     nlm.res <- nlm(f=em.f, p=initial.params, hessian=TRUE, ...)
-    nlm.res <- nlm(f=pois.nll, p=initial.params, hessian=TRUE, 
-                   states.list=states.list,
-                   stats=stats,
-                   event.times=event.times,
-                   types.active=types.active,
-                   event.support=event.support,
-                   ...)
+    nlm.res <- nrmin(f=pois.nll, p=initial.params,
+                     states.list=states.list,
+                     stats=stats,
+                     event.times=event.times,
+                     types.active=types.active,
+                     event.support=event.support,
+                     ...)
+#     nlm.res <- nlm(f=pois.nll, p=initial.params,
+#                    hessian=TRUE, check.analyticals=FALSE,
+#                    states.list=states.list,
+#                    stats=stats,
+#                    event.times=event.times,
+#                    types.active=types.active,
+#                    event.support=event.support,
+#                    ...)
     if (verbose) cat('Done!\n')
 
 #     cat('nlm code:', nlm.res$code, '\n')
@@ -97,6 +105,71 @@ em.base <- function(event.history, state.functions, stats, initial.params=numeri
     res$names <- names(stats)
     class(res) <- c("renm")
     res
+}
+
+nrmin <- function(f, p, objtol=1e-6, steptol=1e-6, gradtol=1e-6, iterlim=100, print.level=0, ...) {
+    k <- length(p)
+    params <- matrix(p, k, 1)
+
+    old.obj <- Inf
+    obj <- Inf
+    iter <- 0
+    repeat{
+        res <- f(params, ...)
+        obj <- res[1]
+        grad <- matrix(attr(res, 'gradient'), k)
+        hess <- attr(res, 'hessian')
+
+        old.params <- params
+        params <- params - solve(hess, grad)
+        step <- params - old.params
+
+        if((print.level >= 1 && iter == 0) || (print.level >= 2)) {
+            cat('\nIteration ', iter, '\n',
+                'Parameter:\n', sep='')
+            print(as.numeric(old.params)) 
+            cat('Objective:\n', obj, '\n', 
+                'Gradient:\n', sep='')
+            print(as.numeric(grad))
+            cat('Step:\n', sep='')
+            print(as.numeric(step))
+        }
+
+        iter <- iter + 1
+
+        # are we exiting?
+        code <- 0
+        if(norm(grad, 'f') < gradtol) {
+            code <- 1
+            break
+        }
+        if(norm(step, 'f') < steptol) {
+            code <- 2
+            break
+        }
+        if(iter > iterlim) {
+            code <- 4
+            break
+        }
+
+        old.obj <- obj
+    }
+
+    codes <- c('Gradient within tolerance',
+               'Step within tolerance',
+               'NOCODE',
+               'FAILED: Iteration limit reached')
+
+    if(print.level >= 0) {
+        cat('\n', codes[code], '\n', sep='')
+    }
+
+    list(minimum=obj,
+         estimate=params,
+         gradient=grad,
+         hessian=hess,
+         code=code,
+         iterations=iter)
 }
 
 #' Entry to point to relational event network model
@@ -123,6 +196,11 @@ renmr.network <- function(event.history, statistics, states=list(), self.loops=F
     renmr.control <- state.renmr.control$new(properties=list(ntype=n*(n-!self.loops),
                                                              nnetwork=n,
                                                              self.loops=self.loops))
+
+    if(verbose) cat('\t', renmr.control$init$nnetwork, ' actors, for ',
+                    renmr.control$init$ntype, ' types\n',sep='')
+    if(verbose) cat('\t', length(evh.res$keep.idx), ' time slices found, taking ',
+                    sum(event.history$`__dtime__`[evh.res$keep.idx]), ' time units\n', sep='')
 
     if (verbose) cat('Parsing states and statistics\n')
     # initialize states
@@ -232,7 +310,8 @@ pois.nll <- function(stats.params,
                      event_times=event.times, stats_params=stats.params,
                      types_active=types.active, keep_idx=keep.idx)
 #     res$gradient <- as.numeric(res$gradient)
-#     print(res) # BUG: purge this line
+#     print(stats.params)
+#     print(pre.res) # BUG: purge this line
 #     res
 
     res <- pre.res$nll
