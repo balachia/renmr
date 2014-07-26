@@ -1,0 +1,7 @@
+Package: renmr
+Title: Flexible event network models in R
+Description:
+Version: 0.1
+Author: Tony Vashevko <avashevko@gmail.com>
+Maintainer: Tony Vashevko <avashevko@gmail.com>
+License: WTFPL
