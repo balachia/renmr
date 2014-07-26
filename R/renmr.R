@@ -107,11 +107,12 @@ em.base <- function(event.history, state.functions, stats, initial.params=numeri
     res
 }
 
-nrmin <- function(f, p, objtol=1e-6, steptol=1e-6, gradtol=1e-6, iterlim=100, print.level=0, ...) {
+nrmin <- function(f, p, objtol=1e-8, steptol=1e-8, gradtol=1e-8, iterlim=100, print.level=0, ...) {
     k <- length(p)
     params <- matrix(p, k, 1)
 
     old.obj <- Inf
+    old.step <- rep(0,k)
     obj <- Inf
     iter <- 0
     repeat{
@@ -132,8 +133,10 @@ nrmin <- function(f, p, objtol=1e-6, steptol=1e-6, gradtol=1e-6, iterlim=100, pr
                 'Gradient:\n', sep='')
             print(as.numeric(grad))
             cat('Step:\n', sep='')
-            print(as.numeric(step))
+            print(as.numeric(old.step))
         }
+
+        old.step <- step
 
         iter <- iter + 1
 
@@ -143,7 +146,7 @@ nrmin <- function(f, p, objtol=1e-6, steptol=1e-6, gradtol=1e-6, iterlim=100, pr
             code <- 1
             break
         }
-        if(norm(step, 'f') < steptol) {
+        if(norm(old.step, 'f') < steptol) {
             code <- 2
             break
         }

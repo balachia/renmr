@@ -117,8 +117,8 @@ stat.factory <- function(name, fun, states, extra.args=list(), name.args=list(),
         res$f <- eval(bquote(.(stat.f), calling.env))
         res$states <- states
 
-        # incorporate extra name argsA
-        if(length(name.args) > 0) fname <- paste(fname, unlist(name.args), sep=':', collapse=)
+        # incorporate extra name args
+        if(length(name.args) > 0) fname <- paste(fname, paste(unlist(name.args), collapse=','), sep=':')
         # this *probably* works to set names
         kind.names <- unlist(lapply(arg.lists, function(x) as.character(eval(x$kind))))
         res$name <- if (length(kind.names) == 0) fname else paste0(fname,'(',paste(kind.names, collapse=','),')')

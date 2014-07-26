@@ -7,7 +7,7 @@ data(chat_network)
 setwd('~/Dropbox/Code/renmr')
 
 set.seed(1)
-chat_small <- chat_network[which(runif(nrow(chat_network)) < 0.5),]
+chat_small <- chat_network[which(runif(nrow(chat_network)) < 1.5),]
 row.names(chat_small) <- NULL
 
 for(nm in list.files('src')) {
@@ -39,14 +39,18 @@ Rprof(filename='network.out', interval=0.01, line.profiling=TRUE, memory.profili
 #                      verbose=TRUE, print.level=2)
 res <- renmr.network(event.history=chat_small,
                      states=list(state.wnetwork.matrix(kind='friend'),
-                                 state.wnetwork.matrix(kind='chat',halflife=30)),
+                                 state.wnetwork.matrix(kind='chat',halflife=10),
+                                 state.wnetwork.matrix(kind='chatfast',type='chat',halflife=1)),
 #                      statistics=list(stat.constant()),
                      statistics=list(stat.constant(),
                                      stat.wnetwork.relation('out','chat'),
-                                     stat.wnetwork.relation('in','chat')
-                                     ),
+                                     stat.wnetwork.relation('in','chat'),
+                                     stat.wnetwork.relation('in','chatfast'),
+                                     stat.wnetwork.relation_product('out','out','chat','friend'),
+                                     stat.wnetwork.relation_product('in','out','chat','friend')),
                      start.time=14336,
-                     verbose=TRUE, print.level=2, iterlim=10)
+                     verbose=TRUE, print.level=2, iterlim=20)
+print(summary(res))
 Rprof(NULL)
 print(proc.time() - ptm)
 
