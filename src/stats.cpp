@@ -32,15 +32,15 @@ NumericVector mat2type(arma::mat matr, bool noloops) {
     return out;
 }
 
-// [[Rcpp::export(".wnetwork.relation")]]
-NumericVector wnetwork_relation(NumericMatrix mat, int dir, bool noloops) {
+// [[Rcpp::export(".wnetwork.dyad")]]
+NumericVector wnetwork_dyad(NumericMatrix mat, int dir, bool noloops) {
     arma::mat matr(orient_mat(as<arma::mat>(mat), dir));
 
     return mat2type(matr, noloops);
 }
 
-// [[Rcpp::export(".wnetwork.relation_product")]]
-NumericVector wnetwork_relation_product(NumericMatrix mat1, int dir1, NumericMatrix mat2, int dir2, bool noloops) {
+// [[Rcpp::export(".wnetwork.dyad_product")]]
+NumericVector wnetwork_dyad_product(NumericMatrix mat1, int dir1, NumericMatrix mat2, int dir2, bool noloops) {
     arma::mat matr1(orient_mat(as<arma::mat>(mat1), dir1));
     arma::mat matr2(orient_mat(as<arma::mat>(mat2), dir2));
 
@@ -48,7 +48,7 @@ NumericVector wnetwork_relation_product(NumericMatrix mat1, int dir1, NumericMat
 }
 
 // [[Rcpp::export(".wnetwork.degree")]]
-NumericVector wnetwork_degree(NumericMatrix mat, int dir, bool noloops) {
+NumericVector wnetwork_degree(NumericMatrix mat, int dir, bool for_target, bool noloops) {
     arma::mat matr(orient_mat(as<arma::mat>(mat), dir));
     arma::vec degvec = arma::sum(matr, 1);
 
@@ -57,8 +57,14 @@ NumericVector wnetwork_degree(NumericMatrix mat, int dir, bool noloops) {
 
     int idx = 0;
     for(int i = 0; i < n; i++) {
-        for(int j = 0; j < n - noloops; j++) {
-            out[idx] = degvec(i);
+        //for(int j = 0; j < n - noloops; j++) {
+        for(int j = 0; j < n; j++) {
+            if(noloops && i == j) continue;
+            if(for_target) {
+                out[idx] = degvec(j);
+            } else {
+                out[idx] = degvec(i);
+            }
             idx++;
         }
     }

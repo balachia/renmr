@@ -1,49 +1,3 @@
-# rm(list=ls())
-
-# TESTING DEFAULTS
-
-# set.seed(1)
-# 
-# n.time <- 20
-# n.actor <- 5
-# n.type <- n.actor^2
-# n.stat <- 5
-# iter.lim <- 5
-# 
-# stat.names <- letters[1:n.stat]
-# 
-# stats.array <- array(rnorm(n.time * n.type * n.stat), dim=c(n.time, n.type, n.stat))
-# event.times <- runif(n.time)
-# stats.params <- rnorm(n.stat) / 10
-# names(stats.params) <- stat.names
-# types.active <- sample(c(1:n.type,NA), n.time, replace=TRUE)
-# event.support <- array(runif(n.time * n.type) < 0.9, dim=c(n.time, n.type))
-# states.list <- lapply(1:n.time, function(x) list(main=x, bork=-x))
-# 
-# stats <- lapply(1:n.stat, function(x) { 
-#         force(x)
-#         function (state) { 
-#             set.seed(x + n.stat*state$main)
-#             rnorm(n.type) 
-#         }
-#     })
-# names(stats) <- stat.names
-# 
-# # let's make an event history...
-# event.history <- data.frame(dtime=runif(n.time), bork=1:n.time)
-# 
-# evh.base <- data.frame(time=1:n.time,
-#                        source=sample(1:n.actor, n.time, replace=TRUE),
-#                        target=sample(1:n.actor, n.time, replace=TRUE))
-# 
-# # let's make some state functions
-# state.functions <- list(
-#         main=list(f=function(state,ev.state) {ev.state$bork},
-#                   init=0)
-#     )
-# 
-# i.t <- 1
-
 # CORE FUNCTIONS
 
 em.base <- function(event.history, state.functions, stats, initial.params=numeric(length(stats)), event.support=TRUE, keep.idx=1:nrow(event.history), verbose=FALSE, ...) {
@@ -112,7 +66,7 @@ nrmin <- function(f, p, objtol=1e-8, steptol=1e-8, gradtol=1e-8, iterlim=100, pr
     params <- matrix(p, k, 1)
 
     old.obj <- Inf
-    old.step <- rep(0,k)
+    step <- matrix(rep(0,k),k)
     obj <- Inf
     iter <- 0
     repeat{
@@ -122,10 +76,23 @@ nrmin <- function(f, p, objtol=1e-8, steptol=1e-8, gradtol=1e-8, iterlim=100, pr
         hess <- attr(res, 'hessian')
 
         old.params <- params
+        old.step <- step
         params <- params - solve(hess, grad)
         step <- params - old.params
 
-        if((print.level >= 1 && iter == 0) || (print.level >= 2)) {
+        # are we exiting?
+        code <- 0
+        if(norm(grad, 'f') < gradtol) {
+            code <- 1
+        }
+        if(iter > 0 && norm(old.step, 'f') < steptol) {
+            code <- 2
+        }
+        if(iter >= iterlim) {
+            code <- 4
+        }
+        
+        if((print.level >= 1 && (iter == 0 || code > 0)) || (print.level >= 2)) {
             cat('\nIteration ', iter, '\n',
                 'Parameter:\n', sep='')
             print(as.numeric(old.params)) 
@@ -136,25 +103,9 @@ nrmin <- function(f, p, objtol=1e-8, steptol=1e-8, gradtol=1e-8, iterlim=100, pr
             print(as.numeric(old.step))
         }
 
-        old.step <- step
+        if(code > 0) break
 
         iter <- iter + 1
-
-        # are we exiting?
-        code <- 0
-        if(norm(grad, 'f') < gradtol) {
-            code <- 1
-            break
-        }
-        if(norm(old.step, 'f') < steptol) {
-            code <- 2
-            break
-        }
-        if(iter > iterlim) {
-            code <- 4
-            break
-        }
-
         old.obj <- obj
     }
 
@@ -163,7 +114,7 @@ nrmin <- function(f, p, objtol=1e-8, steptol=1e-8, gradtol=1e-8, iterlim=100, pr
                'NOCODE',
                'FAILED: Iteration limit reached')
 
-    if(print.level >= 0) {
+    if(print.level >= 1) {
         cat('\n', codes[code], '\n', sep='')
     }
 

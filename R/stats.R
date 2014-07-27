@@ -43,19 +43,19 @@ stat.constant <- stat.factory(name='constant',
 
 # WEIGHTED MATRIX NETWORKS
 
-stat.wnetwork.relation <- stat.factory(name='relation',
+stat.wnetwork.dyad <- stat.factory(name='dyad',
                                        extra.args=list(dir='both'),
                                        name.args=list(dir),
                                        states=list(state.wnetwork.matrix(kind=kind)),
                                        fun=function(x) {
 #     mat <- orient_mat(x[[ .(name(states[[1]])) ]], dir=dir)
 #     mat2type(mat,x)
-    .wnetwork.relation(mat=x[[ .(name(states[[1]])) ]],
+    .wnetwork.dyad(mat=x[[ .(name(states[[1]])) ]],
                        dir=dir.enum[dir],
                        noloops= !x[['renmr.control']][['self.loops']])
 })
 
-stat.wnetwork.relation_product <- stat.factory(name='relation_product',
+stat.wnetwork.dyad_product <- stat.factory(name='dyad_product',
                                                extra.args=list(dir1='both', dir2='both'),
                                                name.args=list(dir1,dir2),
                                                states=list(state.wnetwork.matrix(kind=kind1),
@@ -65,7 +65,7 @@ stat.wnetwork.relation_product <- stat.factory(name='relation_product',
 #     mat2 <- orient_mat(x[[ .(name(states[[2]])) ]], dir2)
 # 
 #     mat2type(mat1 * mat2, x)
-    .wnetwork.relation_product(mat1=x[[ .(name(states[[1]])) ]],
+    .wnetwork.dyad_product(mat1=x[[ .(name(states[[1]])) ]],
                        dir1=dir.enum[dir1],
                        mat2=x[[ .(name(states[[2]])) ]],
                        dir2=dir.enum[dir2],
@@ -73,14 +73,15 @@ stat.wnetwork.relation_product <- stat.factory(name='relation_product',
 })
 
 stat.wnetwork.degree <- stat.factory(name='degree',
-                                     extra.args=list(dir='both'),
-                                     name.args=list(dir),
+                                     extra.args=list(dir='both',focus='source'),
+                                     name.args=list(dir,focus),
                                      states=list(state.wnetwork.matrix(kind=kind)),
                                      fun=function(x) {
 #     mat <- orient_mat(x[[ .(name(states[[1]])) ]], dir)
 #     rep(rowSums(mat), each=x[['renmr.control']][['nnetwork']] - (!x[['renmr.control']][['self.loops']]))
     .wnetwork.degree(mat=x[[ .(name(states[[1]])) ]],
                      dir=dir.enum[dir],
+                     for_target=(focus=='target'),
                      noloops= !x[['renmr.control']][['self.loops']])
 })
 

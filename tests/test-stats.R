@@ -24,22 +24,22 @@ test_that('stat.constant correct', {
     expect_that(res, equals(rep(1,6)))
 })
 
-test_that('stat.wnetwork.relation correct', {
-    f <- stat.wnetwork.relation(dir='in', kind='foo')$f
+test_that('stat.wnetwork.dyad correct', {
+    f <- stat.wnetwork.dyad(dir='in', kind='foo')$f
     res <- f(states.nsl)
     expect_that(res, equals(c(0,0,1,0,1,1)))
 
-    f <- stat.wnetwork.relation(dir='both', kind='foo')$f
+    f <- stat.wnetwork.dyad(dir='both', kind='foo')$f
     res <- f(states.nsl)
     expect_that(res, equals(rep(1,6)))
 })
 
-test_that('stat.wnetwork.relation_product correct', {
-    f <- stat.wnetwork.relation_product(dir1='out',kind1='foo',dir2='in',kind2='bar')$f
+test_that('stat.wnetwork.dyad_product correct', {
+    f <- stat.wnetwork.dyad_product(dir1='out',kind1='foo',dir2='in',kind2='bar')$f
     res <- f(states.nsl)
     expect_that(res, equals(c(1,2,0,1,0,0)))
 
-    f <- stat.wnetwork.relation_product(dir1='out',kind1='foo',dir2='both',kind2='bar')$f
+    f <- stat.wnetwork.dyad_product(dir1='out',kind1='foo',dir2='both',kind2='bar')$f
     res <- f(states.nsl)
     expect_that(res, equals(c(2,4,0,2,0,0)))
 })
@@ -52,6 +52,10 @@ test_that('stat.wnetwork.degree correct', {
     f <- stat.wnetwork.degree(dir='both',kind='foo')$f
     res <- f(states.nsl)
     expect_that(res, equals(rep(2,6)))
+
+    f <- stat.wnetwork.degree(dir='in',focus='target',kind='foo')$f
+    res <- f(states.nsl)
+    expect_that(res, equals(c(1,2,0,2,0,1)))
 })
 
 test_that('stat.wnetwork.triangle correct', {
