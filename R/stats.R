@@ -33,6 +33,11 @@ dir.enum <- c(0,1,2)
 names(dir.enum) <- c('out','in','both')
 
 # CONSTANT
+#' Constant statistic
+#'
+#' This is the constant statistic.
+#' 
+#' @export
 stat.constant <- stat.factory(name='constant',
                               states=list(state.empty(kind=kind)),
                               fun=function(x) {
@@ -43,6 +48,12 @@ stat.constant <- stat.factory(name='constant',
 
 # WEIGHTED MATRIX NETWORKS
 
+#' Dyad statistic
+#'
+#' The dyad statistic measures the value of the dyad between two actors.
+#' It takes a weighted network matrix as input.
+#'
+#' @export
 stat.wnetwork.dyad <- stat.factory(name='dyad',
                                        extra.args=list(dir='both'),
                                        name.args=list(dir),
@@ -55,6 +66,12 @@ stat.wnetwork.dyad <- stat.factory(name='dyad',
                        noloops= !x[['renmr.control']][['self.loops']])
 })
 
+#' Dyad product statistic
+#'
+#' The dyad product statistic interacts the values of a particular dyad across two network modes.
+#' It takes two weighted network matrices as input.
+#'
+#' @export
 stat.wnetwork.dyad_product <- stat.factory(name='dyad_product',
                                                extra.args=list(dir1='both', dir2='both'),
                                                name.args=list(dir1,dir2),
@@ -72,6 +89,13 @@ stat.wnetwork.dyad_product <- stat.factory(name='dyad_product',
                        noloops= !x[['renmr.control']][['self.loops']])
 })
 
+#' Degree statistic
+#'
+#' The degree statistic counts the in-/out-/sum-degree of either the source or target of
+#' a particular dyad.
+#' It takes a weighted network matrix as input.
+#'
+#' @export
 stat.wnetwork.degree <- stat.factory(name='degree',
                                      extra.args=list(dir='both',focus='source'),
                                      name.args=list(dir,focus),
@@ -85,6 +109,14 @@ stat.wnetwork.degree <- stat.factory(name='degree',
                      noloops= !x[['renmr.control']][['self.loops']])
 })
 
+#' Triangle statistic
+#'
+#' The triangle statistic counts the weighted number of two paths around a dyad.
+#' Specifically, it's equal to the square root of the sum of the product of all two path weights
+#' going from a source to a target.
+#' It takes two weighted network matrices as input.
+#'
+#' @export
 stat.wnetwork.triangle <- stat.factory(name='triangle',
                                        extra.args=list(dir1='both', dir2='both'),
                                        name.args=list(dir1,dir2),
@@ -102,6 +134,13 @@ stat.wnetwork.triangle <- stat.factory(name='triangle',
                        noloops= !x[['renmr.control']][['self.loops']])
 })
 
+#' Triangle product statistic
+#'
+#' The triangle product statistic interacts the triangle statistic of a dyad with with the value
+#' of some other mode of the network.
+#' It takes two weighted network matrices as input.
+#'
+#' @export
 stat.wnetwork.triangle_product <- stat.factory(name='triangle_product',
                                        extra.args=list(dir1='both', dir2='both', dir.prod='both'),
                                        name.args=list(dir1,dir2),

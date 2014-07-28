@@ -1,6 +1,6 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
-//#include <google/profiler.h>
+#include <google/profiler.h>
 
 using namespace Rcpp;
 
@@ -8,7 +8,8 @@ using namespace Rcpp;
 List pois_nll(ListOf<List> states_list, ListOf<Function> stats,
         NumericVector event_times, arma::vec stats_params,
         IntegerVector types_active, IntegerVector keep_idx) {
-    //ProfilerStart("gperf.log");
+    Rcout << "profiler start" << std::endl;
+    ProfilerStart("/Users/avashevko/Dropbox/Code/renmr/gperf.log");
 
     // pull in inputs...
     // let's trust some implementation details: guaranteed to have state renmr.control with type
@@ -72,7 +73,7 @@ List pois_nll(ListOf<List> states_list, ListOf<Function> stats,
         }
     }
 
-    //ProfilerStop();
+    ProfilerStop();
 
     // result list
     List res;

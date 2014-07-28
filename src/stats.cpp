@@ -77,7 +77,7 @@ NumericVector wnetwork_triangle(NumericMatrix mat1, int dir1, NumericMatrix mat2
     arma::mat matr1(orient_mat(as<arma::mat>(mat1), dir1));
     arma::mat matr2(orient_mat(as<arma::mat>(mat2), dir2));
 
-    return mat2type((matr1 * matr2).eval(), noloops);
+    return mat2type((sqrt(matr1 * matr2)).eval(), noloops);
 }
 
 // [[Rcpp::export(".wnetwork.triangle_product")]]
@@ -89,6 +89,6 @@ NumericVector wnetwork_triangle_product(NumericMatrix mat1, int dir1,
     arma::mat matr2(orient_mat(as<arma::mat>(mat2), dir2));
     arma::mat matr_prod(orient_mat(as<arma::mat>(mat_prod), dir_prod));
 
-    return mat2type(((matr1 * matr2) % matr_prod).eval(), noloops);
+    return mat2type((sqrt(matr1 * matr2) % matr_prod).eval(), noloops);
 }
 

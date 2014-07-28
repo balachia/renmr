@@ -1,10 +1,4 @@
-
-# name <- function(obj) {
-#     UseMethod('name')
-# }
-
-# name.renmr.state <- function(obj) attr(obj, 'name')
-
+#' @export
 print.renmr.state <- function(obj) {
     cat('renmr.state: ', obj$name, '\n')
     cat('taking types: ', paste(names(formals(environment(obj$new)$fun)), sep=', '), '\n')

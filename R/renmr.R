@@ -1,5 +1,22 @@
 # CORE FUNCTIONS
 
+#' Estimation core
+#'
+#' \code{em.base} corrals the event history and state list, runs the optimization procedure,
+#' and wraps the result.
+#'
+#' @param event.history A data frame sorted by event order, containing special variables
+#' `__dtime__` and `__type__` (names unfortunately subject to change),
+#' as well as any covariates required by state transition functions.
+#' @param state.functions A list of state functions, comprising an initial value
+#' and a state transition function.
+#' @param stats A list of statistic functions.
+#' @param initial.params A vector of initial parameter values.
+#' @param event.support Not yet implemented
+#' @param keep.idx A vector of time slices indices to use in the estimation procedure.
+#' The only indices that should be dropped are 'state updates' for which the time
+#' difference is 0 and no events occured.
+#' @param verbose Print progress information?
 em.base <- function(event.history, state.functions, stats, initial.params=numeric(length(stats)), event.support=TRUE, keep.idx=1:nrow(event.history), verbose=FALSE, ...) {
     # event.history: data.frame
     #   sorted by event order
@@ -61,7 +78,18 @@ em.base <- function(event.history, state.functions, stats, initial.params=numeri
     res
 }
 
-nrmin <- function(f, p, objtol=1e-8, steptol=1e-8, gradtol=1e-8, iterlim=100, print.level=0, ...) {
+#' Newton-Raphson Optimization
+#'
+#' Home brewed Newton-Raphson optimization because \code{nlm} does weird things.
+#' 
+#' @param f A function that returns its value, gradient, and hessian
+#' given a vector of parameters.
+#' @param p A vector of initial parameter values.
+#' @param steptol Minimum step distance to continue optimization (Euclidean Norm).
+#' @param gradtol Minimum gradient size to continue optimization (Euclidean Norm).
+#' @param iterlim Maximum number of iterations.
+#' @param print.level Amount of trace information to print (0,1,2).
+nrmin <- function(f, p, steptol=1e-8, gradtol=1e-8, iterlim=100, print.level=0, ...) {
     k <- length(p)
     params <- matrix(p, k, 1)
 
@@ -132,7 +160,7 @@ nrmin <- function(f, p, objtol=1e-8, steptol=1e-8, gradtol=1e-8, iterlim=100, pr
 #' @param statistics a _list_ of model statistics to include, in renmr.statistic format
 #' @param self.loops does the network allow for self-loop events (e.g. i sends event to i)?
 #' @param verbose report solver progress?
-#' @param ... parameters passed on to event_history.network, and other low level methods
+#' @param ... parameters passed on to event_history.network, and deeper methods
 #' @export
 renmr.network <- function(event.history, statistics, states=list(), self.loops=FALSE, verbose=FALSE, ...) {
     if (verbose) cat('Processing event history\n')
@@ -303,6 +331,9 @@ build_state <- function(event.history, state.functions) {
     res
 }
 
+#' Parse a state specification
+#'
+#' Parses a state specification.
 parse_states <- function(spec, env=parent.frame()) {
     reqs <- list()
 
@@ -368,6 +399,7 @@ initialize_states <- function(state.requirements, additional.args=list()) {
 
 # OUTPUT FUNCTIONS
 
+#' @export
 print.summary.renm <- function(object) {
     cat('Relational Event Network Model\n')
     cat(object$iterations, ' iterations (nlm exit code ', object$code, ')\n\n', sep='')
@@ -379,6 +411,7 @@ print.summary.renm <- function(object) {
     cat('AIC:',object$AIC,'\n')
 }
 
+#' @export
 summary.renm <- function(object) {
     ests <- object$estimate
     ses <- sqrt(diag(solve(object$hessian)))
@@ -405,10 +438,12 @@ summary.renm <- function(object) {
 #' Extracts object name
 #'
 #' @param obj the object of interest
+#' @export
 name <- function(obj) {
     UseMethod('name')
 }
 
+#' @export
 name.default <- function(obj) {
     tryCatch(obj$name, error=function(e) stop('object has no name defined'))
 }

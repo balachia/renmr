@@ -1,7 +1,11 @@
 Package: renmr
 Title: Flexible event network models in R
-Description:
+Description: 
 Version: 0.1
 Author: Tony Vashevko <avashevko@gmail.com>
 Maintainer: Tony Vashevko <avashevko@gmail.com>
 License: WTFPL
+Imports:
+    Rcpp (>= 0.11.0),
+    RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo

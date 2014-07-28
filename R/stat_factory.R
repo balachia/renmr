@@ -7,21 +7,14 @@
 #       'args' - arguments to the constructor
 #           in particular, 'kind', the special argument
 
+#' @export
 print.renmr.state.requirement <- function(obj) {
     cat('requirement:\n')
     print(obj$state)
     cat('defining: \n', paste0(names(obj$args), '=', obj$args, '\n'))
 }
 
-
-# name.stat.state <- function(states,n) {
-#     if(is.null(states[[n]]$args$kind)) {
-#         return(states[[n]]$state$name)
-#     } else {
-#         return(paste0(states[[n]]$state$name, ':', states[[n]]$args$kind))
-#     }
-# }
-
+#' @export
 name.renmr.state.requirement <- function(obj) {
     if(is.null(obj$args$kind)) {
         return(obj$state$name)
@@ -30,9 +23,21 @@ name.renmr.state.requirement <- function(obj) {
     }
 }
 
-#' Construct a statistic function
+#' Factory for statistic function constructors
 #'
-#' 
+#' \code{stat.factory} is a factory for statistic function constructors -
+#' it generates abstract statistics that can be applied to a particular event model.
+#'
+#' @param name The generic name of the statistic.
+#' @param fun The body of the resulting statistic function, with format described in Details.
+#' @param states A specification of the states required by the object,
+#' with specification format described in details.
+#' @param extra.args A list of additional arguments needed to construct the function.
+#' @param name.args A list of arguments used to build the displayed name of a specific statistic.
+#' @param env The environment in which the abstract function should be built.
+#' This ensures that the factory process has access to any methods required by the statistic.
+#'
+#' @export 
 stat.factory <- function(name, fun, states, extra.args=list(), name.args=list(), env=parent.frame()) {
 # stat.factory <- function(name, fun, states, mapping) {
     # 'fun' - a function skeleton
